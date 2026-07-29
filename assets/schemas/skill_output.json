@@ -1,0 +1,358 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FightingGameComboOptimizerOutput",
+  "description": "Universal output schema for the fighting game combo optimizer skill",
+  "type": "object",
+  "required": [
+    "metadata",
+    "verdict",
+    "disclosure",
+    "analysis",
+    "evidence_chain",
+    "sources"
+  ],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["skill_name", "version", "timestamp", "language"],
+      "properties": {
+        "skill_name": {
+          "type": "string",
+          "const": "fighting-game-combo-optimizer"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "language": {
+          "type": "string",
+          "enum": ["en", "vi"]
+        },
+        "analysis_duration_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tokens_used": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "required": ["category", "confidence"],
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": [
+            "optimal_combo_plan",
+            "conditional_execution_risk",
+            "suboptimal_routes",
+            "inconclusive"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 20
+        }
+      }
+    },
+    "disclosure": {
+      "type": "object",
+      "required": ["content", "placement"],
+      "properties": {
+        "content": {
+          "type": "string",
+          "minLength": 50,
+          "description": "Risk and limitation disclosure content"
+        },
+        "placement": {
+          "type": "string",
+          "enum": ["before_verdict"],
+          "description": "Where the disclosure appears (must be before verdict)"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {"type": "string"},
+              "description": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "required": ["inputs_scope", "core_analysis", "scenarios"],
+      "properties": {
+        "inputs_scope": {
+          "type": "object",
+          "properties": {
+            "object_of_analysis": {"type": "string"},
+            "scope": {"type": "string"},
+            "timeframe": {"type": "string"},
+            "available_inputs": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "target_audience": {"type": "string"}
+          }
+        },
+        "core_analysis": {
+          "type": "object",
+          "description": "Domain-specific analysis content",
+          "properties": {
+            "game": {"type": "string"},
+            "character": {"type": "string"},
+            "analysis_type": {"type": "string"},
+            "findings": {
+              "type": "object",
+              "properties": {
+                "frame_data": {
+                  "type": "object",
+                  "properties": {
+                    "move": {"type": "string"},
+                    "startup": {"type": "integer"},
+                    "active": {"type": "integer"},
+                    "recovery": {"type": "integer"},
+                    "advantage_block": {"type": "integer"},
+                    "advantage_hit": {"type": "integer"}
+                  }
+                },
+                "combo_routes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "route": {"type": "string"},
+                      "damage": {"type": "number"},
+                      "meter_cost": {"type": "integer"},
+                      "difficulty": {"type": "string"},
+                      "consistency": {"type": "number"}
+                    }
+                  }
+                },
+                "punish_options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "punish": {"type": "string"},
+                      "situation": {"type": "string"},
+                      "damage": {"type": "number"},
+                      "startup_required": {"type": "integer"}
+                    }
+                  }
+                },
+                "meter_economy": {
+                  "type": "object",
+                  "properties": {
+                    "efficiency_rating": {"type": "number"},
+                    "build_vs_spend": {"type": "string"},
+                    "recommendation": {"type": "string"}
+                  }
+                },
+                "okizeme": {
+                  "type": "object",
+                  "properties": {
+                    "setup": {"type": "string"},
+                    "mixups": {
+                      "type": "array",
+                      "items": {"type": "string"}
+                    },
+                    "timing": {"type": "string"}
+                  }
+                }
+              }
+            },
+            "metrics": {
+              "type": "object",
+              "properties": {
+                "damage_optimized": {"type": "number"},
+                "meter_efficiency": {"type": "number"},
+                "execution_difficulty": {
+                  "type": "string",
+                  "enum": ["easy", "medium", "hard", "expert"]
+                },
+                "consistency_rating": {
+                  "type": "number",
+                  "minimum": 0.0,
+                  "maximum": 1.0
+                }
+              }
+            }
+          }
+        },
+        "scenarios": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "required": ["name", "probability", "outcome"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "enum": ["best_case", "base_case", "worst_case"]
+              },
+              "probability": {
+                "type": "number",
+                "minimum": 0.0,
+                "maximum": 1.0
+              },
+              "outcome": {
+                "type": "string",
+                "minLength": 10
+              },
+              "combo_route": {"type": "string"},
+              "damage": {"type": "number"},
+              "conditions": {"type": "string"}
+            }
+          }
+        },
+        "recommended_actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "action": {"type": "string"},
+              "priority": {
+                "type": "string",
+                "enum": ["high", "medium", "low"]
+              },
+              "reasoning": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "evidence_chain": {
+      "type": "object",
+      "required": ["collected", "knowledge_base", "hierarchy_respected"],
+      "properties": {
+        "collected": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "object",
+            "properties": {
+              "content": {"type": "string"},
+              "source": {"type": "string"},
+              "tier": {
+                "type": "string",
+                "enum": ["tier_1", "tier_2", "tier_3", "tier_4"]
+              },
+              "date_accessed": {"type": "string", "format": "date"}
+            }
+          }
+        },
+        "knowledge_base_entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {"type": "string"},
+              "authors": {"type": "array", "items": {"type": "string"}},
+              "year": {"type": "integer"},
+              "venue": {"type": "string"},
+              "doi": {"type": "string"},
+              "tier": {"type": "string"},
+              "relevance": {"type": "number"}
+            }
+          }
+        },
+        "hierarchy_respected": {
+          "type": "boolean",
+          "const": true
+        },
+        "gaps_flagged": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["name", "url", "tier", "access_date"],
+        "properties": {
+          "name": {"type": "string"},
+          "url": {"type": "string", "format": "uri"},
+          "tier": {
+            "type": "string",
+            "enum": ["tier_1", "tier_2", "tier_3", "tier_4"]
+          },
+          "access_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "authors": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "publication_date": {
+            "type": "string",
+            "oneOf": [
+              {"format": "date"},
+              {"format": "date-time"}
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": ["frame_data_db", "combo_guide", "academic_paper", "forum", "video", "news"]
+          }
+        }
+      }
+    },
+    "quality_gates": {
+      "type": "object",
+      "required": ["universal", "domain"],
+      "properties": {
+        "universal": {
+          "type": "object",
+          "properties": {
+            "U1": {"type": "boolean"},
+            "U2": {"type": "boolean"},
+            "U3": {"type": "boolean"},
+            "U4": {"type": "boolean"},
+            "U5": {"type": "boolean"},
+            "U6": {"type": "boolean"}
+          }
+        },
+        "domain": {
+          "type": "object",
+          "properties": {
+            "G1": {"type": "boolean"},
+            "G2": {"type": "boolean"},
+            "G3": {"type": "boolean"},
+            "G4": {"type": "boolean"}
+          }
+        },
+        "all_passed": {
+          "type": "boolean"
+        },
+        "auto_fixes_applied": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "limitation_flags": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  }
+}

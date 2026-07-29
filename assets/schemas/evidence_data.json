@@ -1,0 +1,324 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EvidenceData",
+  "description": "Schema for evidence data structures in fighting game analysis",
+  "definitions": {
+    "EvidenceSource": {
+      "type": "object",
+      "required": ["name", "url", "tier"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "tier": {
+          "type": "string",
+          "enum": ["tier_1", "tier_2", "tier_3", "tier_4"],
+          "description": "Evidence tier per hierarchy"
+        },
+        "access_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "authors": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "publication_date": {
+          "oneOf": [
+            {"type": "string", "format": "date"},
+            {"type": "string", "format": "date-time"},
+            {"type": "null"}
+          ]
+        },
+        "doi": {
+          "type": "string",
+          "pattern": "^10\\..+",
+          "description": "Digital Object Identifier"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["academic_paper", "systematic_review", "meta_analysis", "guideline", "frame_data_db", "combo_guide", "forum", "video", "news"]
+        },
+        "relevance_score": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 10.0,
+          "description": "Relevance score for this evidence"
+        },
+        "citation_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of citations (for academic sources)"
+        }
+      }
+    },
+    "EvidenceItem": {
+      "type": "object",
+      "required": ["content", "source", "tier", "applicability"],
+      "properties": {
+        "content": {
+          "type": "string",
+          "minLength": 10,
+          "description": "The evidence content or finding"
+        },
+        "source": {
+          "$ref": "#/definitions/EvidenceSource"
+        },
+        "tier": {
+          "type": "string",
+          "enum": ["tier_1", "tier_2", "tier_3", "tier_4"]
+        },
+        "applicability": {
+          "type": "string",
+          "enum": ["direct", "supporting", "contextual"],
+          "description": "How directly this evidence applies"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "notes": {
+          "type": "string"
+        },
+        "extraction_date": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "FrameDataEvidence": {
+      "type": "object",
+      "required": ["game", "character", "move", "data", "source"],
+      "properties": {
+        "game": {"type": "string"},
+        "character": {"type": "string"},
+        "move": {"type": "string"},
+        "data": {
+          "type": "object",
+          "properties": {
+            "startup": {"type": "integer"},
+            "active": {"type": "integer"},
+            "recovery": {"type": "integer"},
+            "total": {"type": "integer"},
+            "advantage_block": {"type": "integer"},
+            "advantage_hit": {"type": "integer"},
+            "advantage_ch": {"type": "integer"},
+            "cancel_window": {"type": "integer"},
+            "properties": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "source": {
+          "$ref": "#/definitions/EvidenceSource"
+        },
+        "verification_status": {
+          "type": "string",
+          "enum": ["verified", "community_consensus", "unverified", "outdated"]
+        },
+        "last_updated": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "ComboRouteEvidence": {
+      "type": "object",
+      "required": ["game", "character", "route", "metrics", "source"],
+      "properties": {
+        "game": {"type": "string"},
+        "character": {"type": "string"},
+        "starting_move": {"type": "string"},
+        "route": {
+          "type": "string",
+          "description": "Combo notation or input sequence"
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "total_damage": {"type": "number"},
+            "meter_cost": {"type": "integer"},
+            "meter_gain": {"type": "integer"},
+            "knockdown_type": {
+              "type": "string",
+              "enum": ["hard", "soft", "techable", "none"]
+            },
+            "okizeme_potential": {
+              "type": "string",
+              "enum": ["high", "medium", "low", "none"]
+            },
+            "scaling_applied": {"type": "boolean"}
+          }
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["easy", "medium", "hard", "expert"]
+        },
+        "consistency_rating": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "optimal_for": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["max_damage", "meter_efficiency", "okizeme", "consistency", "corner", "midscreen"]
+          }
+        },
+        "source": {
+          "$ref": "#/definitions/EvidenceSource"
+        },
+        "verification_status": {
+          "type": "string",
+          "enum": ["tested", "theoretical", "community_verified"]
+        }
+      }
+    },
+    "PunishAnalysisEvidence": {
+      "type": "object",
+      "required": ["situation", "frame_disadvantage", "punish_options", "source"],
+      "properties": {
+        "situation": {
+          "type": "object",
+          "properties": {
+            "opponent_move": {"type": "string"},
+            "on_block": {"type": "boolean"},
+            "on_whiff": {"type": "boolean"},
+            "spacing": {
+              "type": "string",
+              "enum": ["close", "mid", "far", "variable"]
+            }
+          }
+        },
+        "frame_disadvantage": {
+          "type": "integer",
+          "description": "Negative value for opponent's disadvantage"
+        },
+        "punish_options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "punish_move": {"type": "string"},
+              "startup_required": {"type": "integer"},
+              "damage": {"type": "number"},
+              "meter_cost": {"type": "integer"},
+              "difficulty": {"type": "string"},
+              "guaranteed": {"type": "boolean"}
+            }
+          }
+        },
+        "optimal_punish": {
+          "type": "object",
+          "properties": {
+            "move": {"type": "string"},
+            "reasoning": {"type": "string"}
+          }
+        },
+        "source": {
+          "$ref": "#/definitions/EvidenceSource"
+        }
+      }
+    },
+    "MeterEconomyEvidence": {
+      "type": "object",
+      "required": ["game", "character", "analysis", "source"],
+      "properties": {
+        "game": {"type": "string"},
+        "character": {"type": "string"},
+        "max_meter": {"type": "integer"},
+        "analysis": {
+          "type": "object",
+          "properties": {
+            "efficiency_ratings": {
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "object",
+                  "properties": {
+                    "damage_per_meter": {"type": "number"},
+                    "utility_per_meter": {"type": "number"}
+                  }
+                }
+              }
+            },
+            "build_moves": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "move": {"type": "string"},
+                  "meter_gain": {"type": "number"},
+                  "risk": {"type": "string"}
+                }
+              }
+            },
+            "spending_recommendations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "situation": {"type": "string"},
+                  "action": {"type": "string"},
+                  "priority": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "source": {
+          "$ref": "#/definitions/EvidenceSource"
+        }
+      }
+    },
+    "EvidenceCollection": {
+      "type": "object",
+      "required": ["items", "metadata"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EvidenceItem"
+          },
+          "minItems": 1
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "collection_date": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "query": {"type": "string"},
+            "sources_searched": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "total_items": {"type": "integer"},
+            "tier_distribution": {
+              "type": "object",
+              "properties": {
+                "tier_1": {"type": "integer"},
+                "tier_2": {"type": "integer"},
+                "tier_3": {"type": "integer"},
+                "tier_4": {"type": "integer"}
+              }
+            },
+            "de duplication_method": {
+              "type": "string",
+              "enum": ["sha256_doi", "sha256_url", "exact_match"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

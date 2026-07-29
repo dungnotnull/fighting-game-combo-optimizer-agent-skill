@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FightingGameComboOptimizerInput",
+  "description": "Universal input schema for the fighting game combo optimizer skill",
+  "type": "object",
+  "required": ["analysis_request"],
+  "properties": {
+    "analysis_request": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Natural language analysis request from the user"
+    },
+    "game": {
+      "type": "string",
+      "description": "Fighting game title (optional if specified in request)"
+    },
+    "character": {
+      "type": "string",
+      "description": "Character to analyze (optional if specified in request)"
+    },
+    "opponent": {
+      "type": "string",
+      "description": "Opponent character (optional)"
+    },
+    "analysis_type": {
+      "type": "string",
+      "enum": [
+        "combo_optimization",
+        "punish_analysis",
+        "frame_data",
+        "meter_economy",
+        "okizeme",
+        "matchup",
+        "comprehensive"
+      ],
+      "default": "comprehensive",
+      "description": "Specific type of analysis to perform"
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "meter_available": {"type": "integer", "minimum": 0},
+        "screen_position": {
+          "type": "string",
+          "enum": ["midscreen", "corner", "wall", "unknown"]
+        },
+        "hit_type": {
+          "type": "string",
+          "enum": ["normal", "counter", "crouching", "unknown"]
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "max_sources": {"type": "integer", "minimum": 1, "maximum": 20},
+        "require_academic": {"type": "boolean"},
+        "language_preference": {
+          "type": "string",
+          "enum": ["en", "vi", "auto"]
+        }
+      }
+    }
+  }
+}
